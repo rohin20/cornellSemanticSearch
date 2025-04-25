@@ -15,6 +15,13 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Cornell Course Search API")
 
+# Log all registered routes on startup
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting up application...")
+    for route in app.routes:
+        logger.info(f"Registered route: {route.path}")
+
 # Set up CORS
 app.add_middleware(
     CORSMiddleware,
