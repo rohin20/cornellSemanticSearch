@@ -65,7 +65,7 @@ client, collection = initialize_db()
 async def root():
     return {"message": "Cornell Course Search API is running"}
 
-@app.get("/api/search")
+@app.get("/search")
 async def search_courses(
     query: str,
     limit: Optional[int] = Query(10, ge=1, le=100),
@@ -105,7 +105,7 @@ async def search_courses(
     
     return {"results": formatted_results}
 
-@app.get("/api/subjects")
+@app.get("/subjects")
 async def get_subjects():
     # Get unique subject codes from the collection
     all_metadatas = collection.get()["metadatas"]
