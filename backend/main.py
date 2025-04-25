@@ -25,16 +25,20 @@ async def startup_event():
 # Set up CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://bigredsearch.vercel.app",
-        "http://localhost:5173",  # For local development
-        "http://localhost:8000"   # For local development
-    ],
+    allow_origins=["*"],  # Allow all origins for now
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Add middleware to log CORS headers
+@app.middleware("http")
+async def log_headers(request, call_next):
+    response = await call_next(request)
+    logger.info(f"Request headers: {request.headers}")
+    logger.info(f"Response headers: {response.headers}")
+    return response
 
 # Initialize ChromaDB and load data
 def initialize_db():
