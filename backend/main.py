@@ -5,6 +5,7 @@ from chromadb.utils import embedding_functions
 import json
 import os
 import uvicorn
+import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Cornell Course Search API")
@@ -20,11 +21,6 @@ app.add_middleware(
 
 # Initialize ChromaDB and load data
 def initialize_db():
-    # Choose an embedding function
-    embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name="all-MiniLM-L6-v2"
-    )
-
     # Create a client and collection
     client = chromadb.Client()
     
@@ -35,24 +31,29 @@ def initialize_db():
         pass
     
     collection = client.create_collection(
-        name="cornell_courses", 
-        embedding_function=embedding_function
+        name="cornell_courses"
     )
     
     # Load course data
     with open('data/fa24.json', 'r') as file:
         courses = json.load(file)
     
+    # Load pre-computed embeddings
+    with open('data/embeddings/embeddings.json', 'r') as f:
+        embeddings = json.load(f)
+    
     # Prepare data for ChromaDB
     ids = [str(i) for i in range(len(courses))]
     documents = [f"{course['subject']}: {course['title']} - {course['description']}" for course in courses]
     metadatas = [{"subject": course["subject"], "title": course["title"]} for course in courses]
+    embeddings_list = [embeddings[str(i)] for i in range(len(courses))]
     
     # Add data to collection
     collection.add(
         ids=ids,
         documents=documents,
-        metadatas=metadatas
+        metadatas=metadatas,
+        embeddings=embeddings_list
     )
     
     return client, collection
@@ -118,6 +119,11 @@ if __name__ == "__main__":
     # Check if data file exists
     if not os.path.exists("data/fa24.json"):
         print("Error: data/fa24.json not found. Please add your course data file.")
+        exit(1)
+    
+    # Check if embeddings exist
+    if not os.path.exists("data/embeddings/embeddings.json"):
+        print("Error: Pre-computed embeddings not found. Please run precompute_embeddings.py first.")
         exit(1)
     
     uvicorn.run(app, host="0.0.0.0", port=8000)
