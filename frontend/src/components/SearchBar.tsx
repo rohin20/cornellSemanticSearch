@@ -8,7 +8,7 @@ import { Skeleton } from "./ui/skeleton";
 
 export const SearchBar = () => {
   const [query, setQuery] = useState("");
-  const { data, isLoading } = useCourseSearch(query);
+  const { data, isLoading, error } = useCourseSearch(query);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +43,10 @@ export const SearchBar = () => {
               <Skeleton className="h-4 w-full" />
             </Card>
           ))
+        ) : error ? (
+          <Card className="p-4 bg-red-50 border-red-200">
+            <p className="text-red-600">Error: {error.message}</p>
+          </Card>
         ) : data?.results.length ? (
           // Search results
           data.results.map((course) => (
@@ -57,7 +61,7 @@ export const SearchBar = () => {
             </Card>
           ))
         ) : query.length > 0 ? (
-          <p className="text-center text-gray-600">Database loading... give us a few seconds and re enter your search!</p>
+          <p className="text-center text-gray-600">No results found. Try a different search term.</p>
         ) : null}
       </div>
     </div>

@@ -28,19 +28,38 @@ export const api = axios.create({
   },
 });
 
+// Add response interceptor for logging
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.data);
+    return response;
+  },
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
 // API functions
 export const searchCourses = async (
   query: string,
   limit?: number,
   subject_filter?: string
 ) => {
-  const params = new URLSearchParams();
-  params.append('query', query);
-  if (limit) params.append('limit', limit.toString());
-  if (subject_filter) params.append('subject_filter', subject_filter);
+  try {
+    console.log('Making search request with params:', { query, limit, subject_filter });
+    const params = new URLSearchParams();
+    params.append('query', query);
+    if (limit) params.append('limit', limit.toString());
+    if (subject_filter) params.append('subject_filter', subject_filter);
 
-  const response = await api.get<SearchResponse>(`/search?${params.toString()}`);
-  return response.data;
+    const response = await api.get<SearchResponse>(`/search?${params.toString()}`);
+    console.log('Search response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Search error:', error);
+    throw error;
+  }
 };
 
 export const getSubjects = async () => {
