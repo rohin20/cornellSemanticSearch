@@ -1,17 +1,31 @@
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCourseSearch } from "@/hooks/useCourseSearch";
 import { Card } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 
 export const SearchBar = () => {
   const [query, setQuery] = useState("");
-  const { data, isLoading, error } = useCourseSearch(query);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const { data, isLoading, error } = useCourseSearch(debouncedQuery);
+
+  // Debounce effect
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 750); // 0.75 seconds
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [query]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    // Force immediate search on button click
+    setDebouncedQuery(query);
   };
 
   return (
