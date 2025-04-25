@@ -7,10 +7,15 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your actual domain
+    allow_origins=[
+        "https://bigredsearch.vercel.app",
+        "http://localhost:5173",  # For local development
+        "http://localhost:8000"   # For local development
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 if __name__ == "__main__":
